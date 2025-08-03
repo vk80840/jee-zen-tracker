@@ -1,0 +1,20 @@
+{
+  "name": "JEE Prep Tracker",
+  "short_name": "JEE Prep",
+  "description": "Smart Study Journal for JEE Aspirants",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#3b82f6",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "categories": ["education", "productivity"],
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
