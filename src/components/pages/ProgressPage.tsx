@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Calendar, TrendingUp, Award, BookOpen } from "lucide-react";
+import { Calendar, TrendingUp, Award, BookOpen, Clock, School, Brain } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StatCard from "@/components/StatCard";
+import SimpleChart from "@/components/SimpleChart";
 import { useLocalStorage, AppData } from "@/hooks/useLocalStorage";
 
 const ProgressPage = () => {
@@ -26,6 +27,29 @@ const ProgressPage = () => {
   
   const averageQuestionsPerDay = totalDays > 0 ? Math.round(totalQuestions / totalDays) : 0;
   const averageStudyHours = totalDays > 0 ? (totalStudyHours / totalDays).toFixed(1) : '0';
+
+  // School attendance stats
+  const schoolPresent = appData.entries.filter(entry => entry.schoolAttendance === 'present').length;
+  const schoolAbsent = appData.entries.filter(entry => entry.schoolAttendance === 'absent').length;
+  const schoolHolidays = appData.entries.filter(entry => entry.schoolAttendance === 'holiday').length;
+  const attendanceRate = (schoolPresent + schoolAbsent) > 0 ? ((schoolPresent / (schoolPresent + schoolAbsent)) * 100).toFixed(1) : "0";
+
+  // Chart data for last 7 days
+  const last7Days = appData.entries
+    .slice(-7)
+    .map(entry => ({
+      name: new Date(entry.date).toLocaleDateString('en-IN', { weekday: 'short' }),
+      value: entry.physics.questions + entry.chemistry.questions + entry.mathematics.questions,
+      date: entry.date
+    }));
+
+  const studyHoursChart = appData.entries
+    .slice(-7)
+    .map(entry => ({
+      name: new Date(entry.date).toLocaleDateString('en-IN', { weekday: 'short' }),
+      value: entry.studyHours,
+      date: entry.date
+    }));
 
   // Subject-wise breakdown
   const subjectStats = {
@@ -94,30 +118,88 @@ const ProgressPage = () => {
         <StatCard
           title="Total Questions"
           value={totalQuestions}
-          subtitle={`Avg: ${averageQuestionsPerDay}/day`}
           icon={BookOpen}
           variant="primary"
         />
         <StatCard
           title="Study Hours"
           value={`${totalStudyHours}h`}
-          subtitle={`Avg: ${averageStudyHours}h/day`}
-          icon={TrendingUp}
+          icon={Clock}
           variant="success"
         />
         <StatCard
-          title="Days Active"
-          value={totalDays}
-          subtitle={`${getConsistencyPercentage()}% consistency`}
-          icon={Calendar}
+          title="School Attendance"
+          value={`${attendanceRate}%`}
+          icon={School}
           variant="warning"
         />
         <StatCard
-          title="Current Streak"
-          value={`${calculateStreak(appData.entries)} days`}
-          icon={Award}
-          variant={calculateStreak(appData.entries) > 0 ? "success" : "default"}
+          title="Consistency"
+          value={`${getConsistencyPercentage()}%`}
+          icon={Calendar}
+          variant="default"
         />
+      </div>
+
+      {/* School Attendance Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <School className="h-5 w-5 text-primary" />
+            School Attendance Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-success">{schoolPresent}</div>
+              <div className="text-sm text-muted-foreground">Present</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-destructive">{schoolAbsent}</div>
+              <div className="text-sm text-muted-foreground">Absent</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-warning">{schoolHolidays}</div>
+              <div className="text-sm text-muted-foreground">Holidays</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Charts */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-primary" />
+              Daily Questions (Last 7 Days)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SimpleChart 
+              data={last7Days}
+              title=""
+              color="hsl(var(--primary))"
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-success" />
+              Study Hours (Last 7 Days)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SimpleChart 
+              data={studyHoursChart}
+              title=""
+              color="hsl(var(--success))"
+            />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Subject-wise Breakdown */}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, Target, Clock, Flame, Brain, CheckCircle } from "lucide-react";
+import { Calendar, Target, Clock, Flame, Brain, CheckCircle, School } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import SubjectCard from "@/components/SubjectCard";
 import { Button } from "@/components/ui/button";
@@ -88,10 +88,10 @@ const HomePage = ({ onStartDaily }: HomePageProps) => {
           variant={streak > 0 ? "warning" : "default"}
         />
         <StatCard
-          title="Goals Today"
-          value={goalsCompleted}
-          icon={Target}
-          variant={goalsCompleted > 0 ? "success" : "default"}
+          title="School Today"
+          value={todayEntry?.schoolAttendance ? todayEntry.schoolAttendance.charAt(0).toUpperCase() + todayEntry.schoolAttendance.slice(1) : "Not marked"}
+          icon={School}
+          variant={todayEntry?.schoolAttendance === 'present' ? "success" : todayEntry?.schoolAttendance === 'holiday' ? "warning" : "default"}
         />
       </div>
 

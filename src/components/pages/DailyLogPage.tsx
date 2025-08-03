@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, Plus, Minus, Clock, Target, Book, CheckCircle } from "lucide-react";
+import { Save, Plus, Minus, Clock, Target, Book, CheckCircle, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,8 +34,9 @@ const DailyLogPage = ({ onComplete }: DailyLogPageProps) => {
       chemistry: { questions: 0, target: 0, topics: [''] },
       mathematics: { questions: 0, target: 0, topics: [''] },
       studyHours: 0,
-      lectures: [{ subject: 'Physics', topic: '' }],
+      lectures: [{ subject: 'Physics', topic: '', quantity: 1 }],
       backlog: [''],
+      schoolAttendance: 'present' as const,
       completed: false,
       notes: ''
     };
@@ -95,11 +96,11 @@ const DailyLogPage = ({ onComplete }: DailyLogPageProps) => {
   const addLecture = () => {
     setFormData(prev => ({
       ...prev,
-      lectures: [...(prev.lectures || []), { subject: 'Physics', topic: '' }]
+      lectures: [...(prev.lectures || []), { subject: 'Physics', topic: '', quantity: 1 }]
     }));
   };
 
-  const updateLecture = (index: number, field: 'subject' | 'topic', value: string) => {
+  const updateLecture = (index: number, field: 'subject' | 'topic' | 'quantity', value: string | number) => {
     setFormData(prev => ({
       ...prev,
       lectures: prev.lectures?.map((lecture, i) => 
@@ -133,6 +134,7 @@ const DailyLogPage = ({ onComplete }: DailyLogPageProps) => {
       studyHours: formData.studyHours || 0,
       lectures: formData.lectures?.filter(l => l.topic.trim()) || [],
       backlog: formData.backlog?.filter(b => b.trim()) || [],
+      schoolAttendance: formData.schoolAttendance || 'present',
       completed,
       notes: formData.notes || ''
     };
@@ -201,6 +203,30 @@ const DailyLogPage = ({ onComplete }: DailyLogPageProps) => {
             <Plus className="h-4 w-4 mr-2" />
             Add Goal
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* School Attendance */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <School className="h-5 w-5 text-primary" />
+            School Attendance
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-2">
+            {(['present', 'absent', 'holiday'] as const).map((status) => (
+              <Button
+                key={status}
+                variant={formData.schoolAttendance === status ? "default" : "outline"}
+                onClick={() => setFormData(prev => ({ ...prev, schoolAttendance: status }))}
+                className="capitalize"
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
@@ -293,21 +319,32 @@ const DailyLogPage = ({ onComplete }: DailyLogPageProps) => {
         </CardHeader>
         <CardContent className="space-y-3">
           {formData.lectures?.map((lecture, index) => (
-            <div key={index} className="grid grid-cols-2 gap-2">
-              <select
-                value={lecture.subject}
-                onChange={(e) => updateLecture(index, 'subject', e.target.value)}
-                className="px-3 py-2 border border-border rounded-md bg-background"
-              >
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Mathematics">Mathematics</option>
-              </select>
-              <Input
-                placeholder="Topic/Chapter"
-                value={lecture.topic}
-                onChange={(e) => updateLecture(index, 'topic', e.target.value)}
-              />
+            <div key={index} className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={lecture.subject}
+                  onChange={(e) => updateLecture(index, 'subject', e.target.value)}
+                  className="px-3 py-2 border border-border rounded-md bg-background"
+                >
+                  <option value="Physics">Physics</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Mathematics">Mathematics</option>
+                </select>
+                <Input
+                  placeholder="Topic/Chapter"
+                  value={lecture.topic}
+                  onChange={(e) => updateLecture(index, 'topic', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Number of Lectures</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={lecture.quantity || 1}
+                  onChange={(e) => updateLecture(index, 'quantity', parseInt(e.target.value) || 1)}
+                />
+              </div>
             </div>
           ))}
           <Button variant="outline" onClick={addLecture} className="w-full">

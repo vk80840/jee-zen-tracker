@@ -32,8 +32,9 @@ export interface DailyEntry {
   chemistry: { questions: number; target: number; topics: string[] };
   mathematics: { questions: number; target: number; topics: string[] };
   studyHours: number;
-  lectures: { subject: string; topic: string }[];
+  lectures: { subject: string; topic: string; quantity: number }[];
   backlog: string[];
+  schoolAttendance: 'present' | 'absent' | 'holiday';
   completed: boolean;
   notes?: string;
 }
